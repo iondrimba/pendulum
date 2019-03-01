@@ -13,4 +13,4 @@
 
 ## Find me @
 
-Follow Ion Drimba Filho: [Twitter](https://twitter.com/code__music), [Codepen](https://codepen.io/iondf_/)
+[Twitter](https://twitter.com/code__music), [Codepen](https://codepen.io/iondf_/)
