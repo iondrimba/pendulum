@@ -1,18 +1,18 @@
 {
-  "name": "interactive-repulsion-effect",
+  "name": "pendulum",
   "version": "1.0.0",
-  "description": "interactive-repulsion-effect",
+  "description": "pendulum",
   "main": "src/index.js",
   "keywords": [
     "Javascript",
     "Threejs",
-    "Interactive",
-    "Repulsion",
+    "Physics",
+    "Pendulum",
     "ES6"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/iondrimba/interactive-repulsion-effect.git"
+    "url": "https://github.com/iondrimba/pendulum.git"
   },
   "scripts": {
     "start": "webpack-dev-server --open --config webpack.dev.js",
