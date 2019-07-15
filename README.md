@@ -1,6 +1,6 @@
 # Pendulum Effect
 
-[![Build Status](https://travis-ci.org/iondrimba/pendulum.svg?branch=master)](https://travis-ci.org/iondrimba/pendulum)
+[![Build Status](https://travis-ci.org/iondrimba/pendulum.svg?branch=master)](https://travis-ci.org/iondrimba/pendulum) [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=iondrimba/pendulum)](https://dependabot.com)
 
 ![Image Title](https://raw.githubusercontent.com/iondrimba/images/master/pendulum.gif)
 
