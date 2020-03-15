@@ -41,5 +41,7 @@
     "webpack-dev-server": "^3.7.1",
     "webpack-merge": "^4.2.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "stats.js": "^0.17.0"
+  }
 }

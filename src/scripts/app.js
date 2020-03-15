@@ -3,6 +3,10 @@ import { map, distance, hexToRgbTreeJs } from './helpers';
 
 export default class App {
   setup() {
+    this.stats = new Stats();
+    this.stats.showPanel(0);
+    document.body.querySelector('.stats').appendChild(this.stats.domElement);
+    
     this.gui = new dat.GUI();
     this.raycaster = new THREE.Raycaster();
     this.pendulum = {
@@ -71,28 +75,6 @@ export default class App {
     });
   }
 
-  addSpotLight() {
-    const obj = { color: '#fff' };
-    const light = new THREE.SpotLight(obj.color, 1);
-
-    light.position.set(0, 50, 0);
-    light.castShadow = true;
-
-    this.scene.add(light);
-
-    const gui = this.gui.addFolder('Spot Light');
-    gui.addColor(obj, 'color').onChange((color) => {
-      light.color = hexToRgbTreeJs(color);
-    });
-  }
-
-  addPointLight(color, position) {
-    const pointLight = new THREE.PointLight(color, 1, 1000, 1);
-    pointLight.position.set(position.x, position.y, position.z);
-
-    this.scene.add(pointLight);
-  }
-
   addSphere() {
     const meshParams = {
       color: '#f90c53',
@@ -133,37 +115,38 @@ export default class App {
     };
 
     const material = new THREE.MeshPhysicalMaterial(meshParams);
+    const geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+    geometry.translate( 0, 3, 0 );
+
+    this.mesh = this.getMesh(geometry, material, this.grid.rows * this.grid.cols);
+    this.scene.add(this.mesh);
+
+    let ii = 0;
+    this.centerX = ((this.grid.cols) + ((this.grid.cols) * this.gutter.size)) * .46;
+    this.centerZ = ((this.grid.rows) + ((this.grid.rows) * this.gutter.size)) * .46;
 
     for (let row = 0; row < this.grid.rows; row++) {
       this.meshes[row] = [];
 
       for (let col = 0; col < this.grid.cols; col++) {
-        const geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-        const mesh = this.getMesh(geometry, material);
-        mesh.position.y = 2.5;
-
         const pivot = new THREE.Object3D();
-
-        pivot.add(mesh);
         pivot.scale.set(1, 1, 1);
-        pivot.position.set(col + (col * this.gutter.size), 0, row + (row * this.gutter.size));
+        pivot.position.set(col + (col * this.gutter.size) - this.centerX, 0, row + (row * this.gutter.size) - this.centerZ);
 
         this.meshes[row][col] = pivot;
 
-        this.groupMesh.add(pivot);
+        pivot.updateMatrix();
+
+        this.mesh.setMatrixAt(ii++, pivot.matrix);
       }
     }
 
-    const centerX = ((this.grid.cols) + ((this.grid.cols) * this.gutter.size)) * .46;
-    const centerZ = ((this.grid.rows) + ((this.grid.rows) * this.gutter.size)) * .46;
-
-    this.groupMesh.position.set(-centerX, 0, -centerZ);
-
-    this.scene.add(this.groupMesh);
+    this.mesh.instanceMatrix.needsUpdate = true;
   }
 
-  getMesh(geometry, material) {
-    const mesh = new THREE.Mesh(geometry, material);
+  getMesh(geometry, material, count) {
+    const mesh = new THREE.InstancedMesh(geometry, material, count);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -175,12 +158,35 @@ export default class App {
     this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
   }
 
+  addDirectionalLight() {
+    this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    this.directionalLight.castShadow = true;
+    this.directionalLight.position.set(0, 1, 0);
+
+    this.directionalLight.shadow.camera.far = 1000;
+    this.directionalLight.shadow.camera.near = -200;
+
+    this.directionalLight.shadow.camera.left = -40;
+    this.directionalLight.shadow.camera.right = 40;
+    this.directionalLight.shadow.camera.top = 20;
+    this.directionalLight.shadow.camera.bottom = -20;
+    this.directionalLight.shadow.camera.zoom = 1;
+    this.directionalLight.shadow.camera.needsUpdate = true;
+
+    const targetObject = new THREE.Object3D();
+    targetObject.position.set(-50, -82, 40);
+    this.directionalLight.target = targetObject;
+
+    this.scene.add(this.directionalLight);
+    this.scene.add(this.directionalLight.target);
+  }
+
   addFloor() {
     const geometry = new THREE.PlaneGeometry(300, 300);
-    const material = new THREE.ShadowMaterial({ opacity: .3 });
+    const material = new THREE.ShadowMaterial({ opacity: .2 });
 
     this.floor = new THREE.Mesh(geometry, material);
-    this.floor.position.y = 0;
+    this.floor.position.y = -1;
     this.floor.rotateX(- Math.PI / 2);
     this.floor.receiveShadow = true;
 
@@ -196,11 +202,11 @@ export default class App {
 
     this.addAmbientLight();
 
-    this.addSpotLight();
-
     this.addSphere();
 
     this.createGrid();
+
+    this.addDirectionalLight();
 
     this.addCameraControls();
 
@@ -229,29 +235,41 @@ export default class App {
 
     const { x, z } = this.sphere.position;
 
+    let ii = 0;
+
     for (let row = 0; row < this.grid.rows; row++) {
       for (let col = 0; col < this.grid.cols; col++) {
 
-        const mesh = this.meshes[row][col];
-        const mouseDistance = distance(x, z, mesh.position.x + this.groupMesh.position.x, mesh.position.z + this.groupMesh.position.z);
-        const y = map(mouseDistance, 4.5, 1, 0, -1);
-        const scale = y > 1 ? 1 : y < 0.001 ? 0.001 : y;
+        const pivot = this.meshes[row][col];
+        const mouseDistance = distance(x, z, pivot.position.x, pivot.position.z);
+        const y = map(mouseDistance, 4.5, 1, 0, -1.5);
+        const scale = y > 1 ? 1 : y < 0.01 ? 0.01 : y;
 
-        TweenMax.to(mesh.scale, .3, {
+        pivot.updateMatrix();
+
+        this.mesh.setMatrixAt(ii++, pivot.matrix);
+
+        TweenMax.to(pivot.scale, .3, {
           ease: Expo.easeOut,
           y: scale,
         });
       }
     }
+
+    this.mesh.instanceMatrix.needsUpdate = true;
   }
 
   animate() {
+    this.stats.begin();
+
     this.controls.update();
 
     this.draw();
 
     this.renderer.render(this.scene, this.camera);
 
+    this.stats.end();
+    
     requestAnimationFrame(this.animate.bind(this));
   }
 }
