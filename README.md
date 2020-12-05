@@ -1,6 +1,6 @@
 # Pendulum Effect
 
-[![Build Status](https://travis-ci.org/iondrimba/pendulum.svg?branch=master)](https://travis-ci.org/iondrimba/pendulum) [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=iondrimba/pendulum)](https://dependabot.com)
+![Node.js CI](https://github.com/iondrimba/pendulum/workflows/Node.js%20CI/badge.svg)
 
 ![Image Title](https://raw.githubusercontent.com/iondrimba/images/master/pendulum.gif)
 
