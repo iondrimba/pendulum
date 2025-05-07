@@ -1,8 +1,10 @@
+
+
+https://github.com/user-attachments/assets/c8978f83-7347-42f1-9ecf-3c0aa298d395
+
 # Pendulum Effect
 
 ![Node.js CI](https://github.com/iondrimba/pendulum/workflows/Node.js%20CI/badge.svg)
-
-![Image Title](https://raw.githubusercontent.com/iondrimba/images/master/pendulum.gif)
 
 [Demo](https://iondrimba.github.io/pendulum/public/)
 
